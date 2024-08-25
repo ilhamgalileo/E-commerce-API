@@ -60,6 +60,6 @@ exports.delete = async (req, res) => {
         if (!deletedProduct) return res.status(404).sent({ message: 'produk tidak ditemukan' })
         res.send({ message: 'produk berhasil dihapus' })
     } catch (err) {
-        res.status(404).sen({ message: err.message })
+        res.status(404).send({ message: err.message })
     }
 }
