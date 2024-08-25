@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 5000
 
 # Jalankan perintah untuk memulai aplikasi
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

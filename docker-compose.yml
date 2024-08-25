@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   mongo:
     image: mongo:latest
@@ -15,12 +14,10 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI="mongodb://mongo:27017/ecommerse_api"
+      - MONGO_URI=mongodb://mongo:27017/ecommerse_api
     depends_on:
       - mongo
-    volumes:
-      - .:/app
-    command: npm run dev
+    command: npm start  # Mengganti perintah default dengan npm start
 
 volumes:
   mongo-data:
