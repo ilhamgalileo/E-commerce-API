@@ -18,7 +18,7 @@ module.exports = mongoose => {
     object.id = _id
     return object
   })
-  
+
   return mongoose.model("Order", schema)
 }
 

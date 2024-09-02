@@ -55,11 +55,14 @@ exports.update = async (req, res) => {
 
 
 exports.delete = async (req, res) => {
+    const id = req.params.id
     try {
-        const deletedProduct = await Product.findByIdAndDelete(req.params.id)
-        if (!deletedProduct) return res.status(404).sent({ message: 'produk tidak ditemukan' })
+        const deletedProduct = await Product.findByIdAndDelete(id)
+        if (!deletedProduct) {
+            return res.status(404).send({ message: 'produk tidak ditemukan' })
+        }
         res.send({ message: 'produk berhasil dihapus' })
     } catch (err) {
-        res.status(404).send({ message: err.message })
+        res.status(500).send({ message: 'Terjadi kesalahan saat menghapus produk: ' + err.message })
     }
 }

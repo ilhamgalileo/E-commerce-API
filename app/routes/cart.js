@@ -1,10 +1,9 @@
-module.exports = app =>{
-  const cart = require('../controllers/cart')
-  const r = require ('express').Router()
-  
-  r.get('/:userId', cart.getCartByUserId)
-  r.post('/', cart.addProduct)
-  r.delete('/:userId', cart.removeCart)
-  app.use("/cart",r)
-  }
-  
+module.exports = app => {
+  const {getCartByUserId, addProduct, removeCart} = require('../controllers/cart')
+  const r = require('express').Router()
+
+  r.get('/:userId', getCartByUserId)
+  r.post('/', addProduct)
+  r.delete('/:userId', removeCart)
+  app.use("/cart", r)
+}
