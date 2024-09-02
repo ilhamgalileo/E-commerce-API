@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
-const db = require('./app/models')
+const { connectDB } = require('./app/models/index')
+require('dotenv').config() // Memuat variabel lingkungan dari file .env
 
 const app = express()
 
@@ -9,7 +10,7 @@ app.use(cors({ origin: '*' }))
 app.use(express.json())
 
 // Koneksi ke database dengan log yang lebih terstruktur
-db.mongoose.connect(db.url)
+connectDB()
     .then(() => console.log('Database connected successfully'))
     .catch(err => {
         console.error('Database connection failed:', err)
@@ -20,6 +21,11 @@ db.mongoose.connect(db.url)
 require('./app/routes/product')(app)
 require('./app/routes/cart')(app)
 require('./app/routes/order')(app)
+require('./app/routes/user')(app)
+
+app.use((req,res,next)=>{
+    res.status(404).json({message: `${req.method} ${req.originalUrl} not found`})
+})
 
 // Mengatur port dan memulai server
 const PORT = process.env.PORT || 5000
