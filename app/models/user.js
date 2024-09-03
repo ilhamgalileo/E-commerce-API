@@ -2,10 +2,34 @@ const bcrypt = require('bcrypt')
 
 module.exports = mongoose => {
   const schema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true }, // Menambahkan unique untuk email
-    password: { type: String, required: true }  // Mengganti 'require' dengan 'required'
-  })
+    name: {
+        type: String,
+        required: [true, 'Nama harus diisi'],
+        trim: true,
+        minlength: [3, 'Nama harus memiliki setidaknya 3 karakter']
+    },
+    email: {
+        type: String,
+        required: [true, 'Email harus diisi'],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        validate: {
+            validator: function(value) {
+                // Regex untuk memeriksa format email yang valid
+                return /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)
+            },
+            message: props => `${props.value} bukan format email yang valid`
+        }
+    },
+    password: {
+        type: String,
+        required: [true, 'Password harus diisi'],
+        minlength: [6, 'Password harus memiliki setidaknya 6 karakter'],
+        select: false // Menghindari password terpilih secara default
+    }
+})
+
 
   // Middleware untuk hashing password sebelum menyimpan user
   schema.pre('save', async function (next) {

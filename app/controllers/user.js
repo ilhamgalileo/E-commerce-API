@@ -8,20 +8,10 @@ exports.register = async (req, res) => {
     const { name, email, password } = req.body
 
     try {
-        // Periksa apakah email sudah digunakan
-        const existingUser = await User.findOne({ email })
-        if (existingUser) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Email sudah digunakan'
-            })
-        }
+        // Membuat pengguna baru berdasarkan input dari body request
+        const user = new User({ name, email, password })
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10)
-
-        // Buat pengguna baru
-        const user = new User({ name, email, password: hashedPassword })
+        // Menyimpan pengguna baru ke database
         await user.save()
 
         return res.status(201).json({
@@ -35,9 +25,21 @@ exports.register = async (req, res) => {
         })
     } catch (error) {
         console.error('Error during registration:', error)
+        
+        // Cek apakah error adalah ValidationError
+        if (error.name === 'ValidationError') {
+            // Mengumpulkan semua pesan error ke dalam array
+            const messages = Object.values(error.errors).map(err => err.message)
+            return res.status(400).json({
+                status: 'error',
+                message: messages.join(', ')
+            })
+        }
+
+        // Menangani error lainnya
         return res.status(500).json({
             status: 'error',
-            message: 'Terjadi kesalahan server'
+            message: 'Terjadi kesalahan saat pendaftaran'
         })
     }
 }
