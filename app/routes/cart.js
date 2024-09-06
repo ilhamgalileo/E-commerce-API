@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken')
 module.exports = app => {
   const authenticate = require('../middleware/middleware')
   const cart = require('../controllers/cart')
