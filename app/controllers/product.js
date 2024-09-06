@@ -1,9 +1,11 @@
-const db = require('../models')
-const Product = db.product
+const  Product  = require('../models/product')
 
 exports.FindMany = async (req, res) => {
     try {
         const data = await Product.find()
+        if(data.length===0){
+        return res.status(404).send({message: 'produk kosong'})
+        }
         res.send(data)
     } catch (err) {
         res.status(500).send({ message: err.message })
@@ -27,10 +29,11 @@ exports.findOne = async (req, res) => {
 
 exports.create = async (req, res) => {
     try {
-        const product = await Product.create(req.body)
-        res.send({ message: 'Data Berhasil disimpan', product })
+        const product = new Product({...req.body})
+        const savedProduct = await product.save()
+        res.status(201).json({ message: 'Data Berhasil disimpan', savedProduct })
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).json({ message: err.message })
     }
 }
 

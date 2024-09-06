@@ -1,64 +1,58 @@
-const db = require('../models') // Mengimpor model dari direktori '../models'
-const Cart = db.cart;
-const Product = db.product
+const Cart = require('../models/cart')
+const Product = require('../models/product')
 
-exports.getCartByUserId = async (req, res) => {
+exports.getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ userId: req.params.userId }).populate('products.productId')
+    const userId = req.user._id
+    const cart = await Cart.findOne({ userId }).populate('products.productId')
+
     if (!cart) {
-      res.status(404).send({ message: 'Cart not found' })
-    } else {
-      res.send(cart)
+      return res.status(404).send({ message: 'anda belum memiliki keranjang' })
     }
+    res.send(cart)
   } catch (err) {
     res.status(500).send({ message: err.message })
   }
 }
 
 exports.addProduct = async (req, res) => {
-  const { userId, sku, quantity } = req.body
+  const { sku, quantity } = req.body
+  const { _id } = req.user
+  console.log("User ID:", _id)
+
   try {
-    // Cari produk berdasarkan SKU
     const product = await Product.findOne({ sku })
     if (!product) {
       return res.status(404).send({ message: 'Produk tidak tersedia' })
     }
 
-    // Periksa apakah jumlah yang diminta melebihi stok yang tersedia
     if (quantity > product.stock) {
       return res.status(400).send({ message: 'Jumlah produk melebihi stok yang tersedia' })
     }
 
-    // Cari keranjang berdasarkan userId
-    let cart = await Cart.findOne({ userId })
+    let cart = await Cart.findOne({ userId: _id })
 
     if (!cart) {
-      // Jika keranjang tidak ada, buat keranjang baru
       cart = new Cart({
-        userId,
+        userId: _id,
         products: [{ productId: product._id, quantity }]
       })
     } else {
-      // Jika keranjang ada, cek apakah produk sudah ada di keranjang
-      const productIndex = cart.products.findIndex(p => p.productId.toString() === product._id.toString())
+      const productIndex = cart.products.findIndex(item => item.productId.toString() === product._id.toString())
 
       if (productIndex > -1) {
-        // Jika produk sudah ada, tambahkan jumlahnya
         const newQuantity = cart.products[productIndex].quantity + quantity
 
-        // Periksa apakah total jumlah melebihi stok yang tersedia
         if (newQuantity > product.stock) {
           return res.status(400).send({ message: 'Jumlah total produk melebihi stok yang tersedia' })
         }
 
         cart.products[productIndex].quantity = newQuantity
       } else {
-        // Jika produk belum ada, tambahkan ke keranjang
         cart.products.push({ productId: product._id, quantity })
       }
     }
 
-    // Simpan keranjang
     await cart.save()
     res.status(201).send(cart)
   } catch (err) {
@@ -67,10 +61,11 @@ exports.addProduct = async (req, res) => {
 }
 
 exports.removeCart = async (req, res) => {
-  const { userId } = req.params
+  const {_id} = req.user
+  const { cartId } = req.params
 
   try {
-    const cart = await Cart.findOneAndDelete({ userId })
+    const cart = await Cart.findOneAndDelete({ _id: cartId, userId: _id })
 
     if (!cart) {
       return res.status(404).send({ message: 'Keranjang tidak ditemukan' })

@@ -1,19 +1,19 @@
-module.exports = mongoose => {
-    const schema = new mongoose.Schema({
-        sku: {type: String, require: true},
-        name: { type: String, require: true },
-        price: { type: String, require: true },
-        description: String,
-        stock: { type: Number, require: true }
-    },
-        {
-            timestamps: true
-        })
-    schema.method("toJSON", function () {
-        const { __v, _id, ...object } = this.toObject()
-        object.id = _id
-        return object
-    })
+const mongoose = require('mongoose')
 
-    return mongoose.model("Product", schema)
-}
+const productSchema = new mongoose.Schema({
+    sku:         { type: String, required: true },
+    name:        { type: String, required: true },
+    price:       { type: Number, required: true },
+    description: { type: String},
+    stock:       { type: Number, required: true }
+}, {
+    timestamps: true
+})
+productSchema.method("toJSON", function () {
+    const { __v, _id, ...object } = this.toObject()
+    object.id = _id
+    return object
+})
+const Product = mongoose.model('Product', productSchema)
+
+module.exports = Product 
